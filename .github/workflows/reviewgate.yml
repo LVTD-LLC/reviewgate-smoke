@@ -31,11 +31,22 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: LVTD-LLC/reviewgate@v0.5.0
+      - id: reviewgate
+        uses: LVTD-LLC/reviewgate@v0.5.0
         with:
           openrouter_api_key: ${{ secrets.OPENROUTER_API_KEY }}
           model: anthropic/claude-sonnet-4
           min_severity: P4
+
+      - name: Upload raw smoke artifact
+        if: ${{ always() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: reviewgate-smoke-raw-${{ github.event.pull_request.head.sha }}
+          path: ${{ steps.reviewgate.outputs.artifact }}
+          if-no-files-found: error
+          retention-days: 3
+          include-hidden-files: true
 
   rereview:
     if: >-
