@@ -21,6 +21,7 @@ jobs:
       pull-requests: write
       issues: write
       checks: write
+      statuses: read
     concurrency:
       group: reviewgate-${{ github.workflow }}-${{ github.event.pull_request.number }}
       cancel-in-progress: true
@@ -33,6 +34,7 @@ jobs:
       - uses: LVTD-LLC/reviewgate@v0
         with:
           openrouter_api_key: ${{ secrets.OPENROUTER_API_KEY }}
+          model: anthropic/claude-sonnet-4
           min_severity: P4
 
   rereview:
