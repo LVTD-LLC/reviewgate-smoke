@@ -2,3 +2,5 @@
 Clean-room smoke tests for ReviewGate releases
 
 This repository validates the moving `v0` action tag from a clean-room installation.
+
+Release smoke in progress: `v0.3.0` agent result and disposition contract.

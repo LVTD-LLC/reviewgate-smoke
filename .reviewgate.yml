@@ -1,0 +1,5 @@
+review_angles:
+  - id: duplicate
+    prompt: First smoke review.
+  - id: duplicate
+    prompt: Second smoke review.
