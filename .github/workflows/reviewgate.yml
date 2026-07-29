@@ -34,6 +34,7 @@ jobs:
         with:
           openrouter_api_key: ${{ secrets.OPENROUTER_API_KEY }}
           min_severity: P4
+          total_timeout_seconds: "30"
 
   rereview:
     if: >-
