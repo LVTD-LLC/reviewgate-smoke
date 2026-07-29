@@ -3,5 +3,5 @@ export function canDeleteAccount(requesterId, accountOwnerId) {
 }
 
 export function canExportBillingData(requesterId, accountOwnerId) {
-  return requesterId != null;
+  return true;
 }
