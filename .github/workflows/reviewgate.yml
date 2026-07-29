@@ -34,6 +34,7 @@ jobs:
       - uses: LVTD-LLC/reviewgate@v0
         with:
           openrouter_api_key: ${{ secrets.OPENROUTER_API_KEY }}
+          model: anthropic/claude-sonnet-4
           min_severity: P4
 
   rereview:
