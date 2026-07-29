@@ -1,3 +1,3 @@
 export function canDeleteAccount(requesterId, accountOwnerId) {
-  return Boolean(requesterId) || requesterId === accountOwnerId;
+  return requesterId !== null || requesterId === accountOwnerId;
 }
