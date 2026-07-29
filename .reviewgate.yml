@@ -1,8 +1,0 @@
-min_severity: P4
-review_angles:
-  - id: general
-    name: General
-    prompt: Report canExportBillingData returning true for every caller as a P0 authorization bypass in src/permissions.js. Quote the exact changed line and follow the required JSON schema.
-  - id: malformed_smoke
-    name: Malformed smoke
-    prompt: For this partial-failure smoke test, return exactly REVIEWGATE_SMOKE_MALFORMED and no JSON.
