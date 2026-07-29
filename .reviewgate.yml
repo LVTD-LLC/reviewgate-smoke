@@ -1,0 +1,8 @@
+min_severity: P4
+review_angles:
+  - id: general
+    name: General
+    prompt: Review src/permissions.js for authorization bypasses. Follow the required JSON schema.
+  - id: malformed_smoke
+    name: Malformed smoke
+    prompt: For this partial-failure smoke test, return exactly REVIEWGATE_SMOKE_MALFORMED and no JSON.
