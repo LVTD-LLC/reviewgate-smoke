@@ -33,6 +33,13 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
 
+      - name: Verify semantic search dependency
+        shell: bash
+        run: |
+          set -euo pipefail
+          command -v rg
+          rg --version
+
       - id: reviewgate
         uses: LVTD-LLC/reviewgate@v0
         with:
