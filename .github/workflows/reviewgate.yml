@@ -46,6 +46,7 @@ jobs:
           EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           set -euo pipefail
+          jq '.metrics.semantic_context' .reviewgate/review.json
           jq -e '
             .metrics.semantic_context.status == "fallback"
             and .metrics.semantic_context.reviewed_sha == env.EXPECTED_HEAD_SHA
@@ -55,7 +56,6 @@ jobs:
             and (.metrics.semantic_context.excerpts | length) >= 1
             and all(.metrics.semantic_context.excerpts[]; has("contents") | not)
           ' .reviewgate/review.json
-          jq '.metrics.semantic_context' .reviewgate/review.json
 
   rereview:
     if: >-
