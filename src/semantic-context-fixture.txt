@@ -1,0 +1,1 @@
+The deep-review smoke expects semantic_context metadata to find this unchanged reference.
