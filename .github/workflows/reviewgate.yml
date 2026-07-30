@@ -31,10 +31,9 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: LVTD-LLC/reviewgate@v0.6.3
+      - uses: LVTD-LLC/reviewgate@v0
         with:
           openrouter_api_key: ${{ secrets.OPENROUTER_API_KEY }}
-          model: anthropic/claude-sonnet-4
           min_severity: P4
 
   rereview:
@@ -61,7 +60,7 @@ jobs:
       cancel-in-progress: false
 
     steps:
-      - uses: LVTD-LLC/reviewgate@v0.6.3
+      - uses: LVTD-LLC/reviewgate@v0
         with:
           mode: rereview
           review_workflow: reviewgate.yml
