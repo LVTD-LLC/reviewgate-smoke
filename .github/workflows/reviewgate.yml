@@ -31,12 +31,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Verify disposition writer permission
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh api repos/${{ github.repository }}/collaborators/rasulkireev/permission --jq .permission
-
-      - uses: LVTD-LLC/reviewgate@v0.6.2
+      - uses: LVTD-LLC/reviewgate@v0.6.3
         with:
           openrouter_api_key: ${{ secrets.OPENROUTER_API_KEY }}
           model: anthropic/claude-sonnet-4
@@ -66,7 +61,7 @@ jobs:
       cancel-in-progress: false
 
     steps:
-      - uses: LVTD-LLC/reviewgate@v0.6.2
+      - uses: LVTD-LLC/reviewgate@v0.6.3
         with:
           mode: rereview
           review_workflow: reviewgate.yml
