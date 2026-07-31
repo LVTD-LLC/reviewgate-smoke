@@ -62,7 +62,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          jq '{review_stages, metrics, cost_summary, findings}' .reviewgate/review.json
+          jq '{status, angle_errors, review_stages, metrics, cost_summary, findings, disposition_updates, tracked_findings}' .reviewgate/review.json
           jq -e '
             ([.review_stages[]
               | select(
