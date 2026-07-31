@@ -37,6 +37,7 @@ jobs:
         uses: LVTD-LLC/reviewgate@v0
         with:
           openrouter_api_key: ${{ secrets.OPENROUTER_API_KEY }}
+          model: openai/gpt-4.1-mini
           min_severity: P4
 
       - name: Verify deep semantic context
@@ -55,6 +56,25 @@ jobs:
             and .metrics.semantic_context.selected_count >= 1
             and (.metrics.semantic_context.excerpts | length) >= 1
             and all(.metrics.semantic_context.excerpts[]; has("contents") | not)
+          ' .reviewgate/review.json
+
+      - name: Verify YAML-enabled verifier skips without candidates
+        if: ${{ always() && steps.reviewgate.outcome != 'skipped' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          jq '{review_stages, metrics, cost_summary, findings}' .reviewgate/review.json
+          jq -e '
+            ([.review_stages[]
+              | select(
+                  .name == "blocker_verifier"
+                  and .status == "skipped"
+                )] | length) == 1
+            and .metrics.verifier_ms == null
+            and ([.cost_summary.components[]
+              | select(.label == "blocker_verifier")] | length) == 0
+            and ([.findings[].semantic_fingerprint] | length)
+              == ([.findings[].semantic_fingerprint] | unique | length)
           ' .reviewgate/review.json
 
   rereview:
