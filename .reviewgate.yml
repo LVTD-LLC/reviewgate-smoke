@@ -1,2 +1,6 @@
 deep: true
 verify_blockers: true
+review_angles:
+  - id: general
+    name: General
+    prompt: Review this PR for high-confidence correctness, security, and reliability defects. Treat contradictions with focused existing tests as strong evidence.
