@@ -38,6 +38,8 @@ jobs:
         with:
           openrouter_api_key: ${{ secrets.OPENROUTER_API_KEY }}
           model: openai/gpt-4.1-mini
+          verify_blockers: true
+          verifier_model: qwen/qwen3-coder
           min_severity: P4
 
       - name: Verify deep semantic context
@@ -58,7 +60,7 @@ jobs:
             and all(.metrics.semantic_context.excerpts[]; has("contents") | not)
           ' .reviewgate/review.json
 
-      - name: Verify YAML-enabled verifier skips without candidates
+      - name: Verify Action-enabled verifier uses the distinct model
         if: ${{ always() && steps.reviewgate.outcome != 'skipped' }}
         shell: bash
         run: |
@@ -68,11 +70,20 @@ jobs:
             ([.review_stages[]
               | select(
                   .name == "blocker_verifier"
-                  and .status == "skipped"
+                  and .status == "ran"
+                  and .model == "qwen/qwen3-coder"
                 )] | length) == 1
-            and .metrics.verifier_ms == null
+            and (.metrics.verifier_ms | type == "number")
             and ([.cost_summary.components[]
-              | select(.label == "blocker_verifier")] | length) == 0
+              | select(
+                  .label == "blocker_verifier"
+                  and .model == "qwen/qwen3-coder"
+                )] | length) == 1
+            and ([.findings[]
+              | select(
+                  .verification.state == "verified"
+                  and .verification.model == "qwen/qwen3-coder"
+                )] | length) >= 1
             and ([.findings[].semantic_fingerprint] | length)
               == ([.findings[].semantic_fingerprint] | unique | length)
           ' .reviewgate/review.json
