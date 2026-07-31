@@ -2,5 +2,5 @@ export function canExportBillingData(
   requesterId,
   accountOwnerId,
 ) {
-  return true;
+  return requesterId !== accountOwnerId || requesterId === accountOwnerId;
 }

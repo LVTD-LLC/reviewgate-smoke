@@ -82,6 +82,8 @@ jobs:
                   .verification.state == "verified"
                   or .verification.state == "rejected"
                 )] | length) >= 1
+            and ([.findings[].semantic_fingerprint] | length)
+              == ([.findings[].semantic_fingerprint] | unique | length)
           ' .reviewgate/review.json
 
   rereview:
