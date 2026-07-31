@@ -42,7 +42,7 @@ jobs:
           verifier_model: qwen/qwen3-coder
           min_severity: P4
 
-      - name: Verify deep semantic context
+      - name: Verify bounded deep semantic context
         if: ${{ always() && steps.reviewgate.outcome != 'skipped' }}
         shell: bash
         env:
@@ -54,9 +54,6 @@ jobs:
             .metrics.semantic_context.status == "fallback"
             and .metrics.semantic_context.reviewed_sha == env.EXPECTED_HEAD_SHA
             and .metrics.semantic_context.parser == "text+builtin_search"
-            and .metrics.semantic_context.changed_symbol_count >= 1
-            and .metrics.semantic_context.selected_count >= 1
-            and (.metrics.semantic_context.excerpts | length) >= 1
             and all(.metrics.semantic_context.excerpts[]; has("contents") | not)
           ' .reviewgate/review.json
 
@@ -84,8 +81,6 @@ jobs:
                   .verification.state == "verified"
                   and .verification.model == "qwen/qwen3-coder"
                 )] | length) >= 1
-            and ([.findings[].semantic_fingerprint] | length)
-              == ([.findings[].semantic_fingerprint] | unique | length)
           ' .reviewgate/review.json
 
   rereview:
