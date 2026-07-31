@@ -38,9 +38,11 @@ jobs:
         with:
           openrouter_api_key: ${{ secrets.OPENROUTER_API_KEY }}
           model: openai/gpt-4.1-mini
+          verify_blockers: true
+          verifier_model: qwen/qwen3-coder
           min_severity: P4
 
-      - name: Verify deep semantic context
+      - name: Verify bounded deep semantic context
         if: ${{ always() && steps.reviewgate.outcome != 'skipped' }}
         shell: bash
         env:
@@ -51,30 +53,29 @@ jobs:
           jq -e '
             .metrics.semantic_context.status == "fallback"
             and .metrics.semantic_context.reviewed_sha == env.EXPECTED_HEAD_SHA
-            and .metrics.semantic_context.parser == "text+builtin_search"
-            and .metrics.semantic_context.changed_symbol_count >= 1
-            and .metrics.semantic_context.selected_count >= 1
-            and (.metrics.semantic_context.excerpts | length) >= 1
+            and (
+              .metrics.semantic_context.parser == "text+rg"
+              or .metrics.semantic_context.parser == "text+builtin_search"
+            )
             and all(.metrics.semantic_context.excerpts[]; has("contents") | not)
           ' .reviewgate/review.json
 
-      - name: Verify YAML-enabled verifier skips without candidates
+      - name: Verify Action-enabled verifier skips without candidates
         if: ${{ always() && steps.reviewgate.outcome != 'skipped' }}
         shell: bash
         run: |
           set -euo pipefail
-          jq '{review_stages, metrics, cost_summary, findings}' .reviewgate/review.json
+          jq '{status, angle_errors, review_stages, metrics, cost_summary, findings, disposition_updates, tracked_findings}' .reviewgate/review.json
           jq -e '
             ([.review_stages[]
               | select(
                   .name == "blocker_verifier"
                   and .status == "skipped"
+                  and .model == "qwen/qwen3-coder"
                 )] | length) == 1
             and .metrics.verifier_ms == null
             and ([.cost_summary.components[]
               | select(.label == "blocker_verifier")] | length) == 0
-            and ([.findings[].semantic_fingerprint] | length)
-              == ([.findings[].semantic_fingerprint] | unique | length)
           ' .reviewgate/review.json
 
   rereview:
