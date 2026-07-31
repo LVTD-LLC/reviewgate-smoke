@@ -37,6 +37,7 @@ jobs:
         uses: LVTD-LLC/reviewgate@v0
         with:
           openrouter_api_key: ${{ secrets.OPENROUTER_API_KEY }}
+          model: openai/gpt-4.1-mini
           min_severity: P4
 
       - name: Verify deep semantic context
@@ -68,13 +69,13 @@ jobs:
               | select(
                   .name == "blocker_verifier"
                   and .status == "ran"
-                  and .model == "deepseek/deepseek-v4-flash"
+                  and .model == "openai/gpt-4.1-mini"
                 )] | length) == 1
             and (.metrics.verifier_ms | type == "number")
             and ([.cost_summary.components[]
               | select(
                   .label == "blocker_verifier"
-                  and .model == "deepseek/deepseek-v4-flash"
+                  and .model == "openai/gpt-4.1-mini"
                 )] | length) == 1
             and ([.findings[]
               | select(
