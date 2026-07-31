@@ -58,7 +58,7 @@ jobs:
             and all(.metrics.semantic_context.excerpts[]; has("contents") | not)
           ' .reviewgate/review.json
 
-      - name: Verify YAML-enabled blocker verification
+      - name: Verify YAML-enabled verifier skips without candidates
         if: ${{ always() && steps.reviewgate.outcome != 'skipped' }}
         shell: bash
         run: |
@@ -68,20 +68,11 @@ jobs:
             ([.review_stages[]
               | select(
                   .name == "blocker_verifier"
-                  and .status == "ran"
-                  and .model == "openai/gpt-4.1-mini"
+                  and .status == "skipped"
                 )] | length) == 1
-            and (.metrics.verifier_ms | type == "number")
+            and .metrics.verifier_ms == null
             and ([.cost_summary.components[]
-              | select(
-                  .label == "blocker_verifier"
-                  and .model == "openai/gpt-4.1-mini"
-                )] | length) == 1
-            and ([.findings[]
-              | select(
-                  .verification.state == "verified"
-                  or .verification.state == "rejected"
-                )] | length) >= 1
+              | select(.label == "blocker_verifier")] | length) == 0
             and ([.findings[].semantic_fingerprint] | length)
               == ([.findings[].semantic_fingerprint] | unique | length)
           ' .reviewgate/review.json
