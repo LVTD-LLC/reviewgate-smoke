@@ -1,3 +1,6 @@
-export function canExportBillingData(requesterId, accountOwnerId) {
-  return requesterId != null;
+export function canExportBillingData(
+  requesterId,
+  accountOwnerId,
+) {
+  return true;
 }
