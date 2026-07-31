@@ -53,7 +53,10 @@ jobs:
           jq -e '
             .metrics.semantic_context.status == "fallback"
             and .metrics.semantic_context.reviewed_sha == env.EXPECTED_HEAD_SHA
-            and .metrics.semantic_context.parser == "text+builtin_search"
+            and (
+              .metrics.semantic_context.parser == "text+rg"
+              or .metrics.semantic_context.parser == "text+builtin_search"
+            )
             and all(.metrics.semantic_context.excerpts[]; has("contents") | not)
           ' .reviewgate/review.json
 
