@@ -57,7 +57,7 @@ jobs:
             and all(.metrics.semantic_context.excerpts[]; has("contents") | not)
           ' .reviewgate/review.json
 
-      - name: Verify Action-enabled verifier uses the distinct model
+      - name: Verify Action-enabled verifier skips without candidates
         if: ${{ always() && steps.reviewgate.outcome != 'skipped' }}
         shell: bash
         run: |
@@ -67,20 +67,12 @@ jobs:
             ([.review_stages[]
               | select(
                   .name == "blocker_verifier"
-                  and .status == "ran"
+                  and .status == "skipped"
                   and .model == "qwen/qwen3-coder"
                 )] | length) == 1
-            and (.metrics.verifier_ms | type == "number")
+            and .metrics.verifier_ms == null
             and ([.cost_summary.components[]
-              | select(
-                  .label == "blocker_verifier"
-                  and .model == "qwen/qwen3-coder"
-                )] | length) == 1
-            and ([.findings[]
-              | select(
-                  .verification.state == "verified"
-                  and .verification.model == "qwen/qwen3-coder"
-                )] | length) >= 1
+              | select(.label == "blocker_verifier")] | length) == 0
           ' .reviewgate/review.json
 
   rereview:
