@@ -33,6 +33,28 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
 
+      - name: Verify standalone install and upgrade
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          install_dir="$RUNNER_TEMP/reviewgate-standalone-smoke"
+          installer="$RUNNER_TEMP/reviewgate-install.sh"
+          curl --proto '=https' --tlsv1.2 -LsSf https://raw.githubusercontent.com/LVTD-LLC/reviewgate/main/scripts/install.sh -o "$installer"
+          REVIEWGATE_VERSION=v0.9.4 REVIEWGATE_INSTALL_DIR="$install_dir" sh "$installer"
+          "$install_dir/reviewgate" --help >/dev/null
+          "$install_dir/reviewgate" upgrade
+          "$install_dir/reviewgate" --help >/dev/null
+          asset_dir="$RUNNER_TEMP/reviewgate-expected-v0.9.5"
+          mkdir -p "$asset_dir"
+          gh release download v0.9.5 --repo LVTD-LLC/reviewgate --pattern reviewgate-x86_64-unknown-linux-gnu.tar.gz --dir "$asset_dir"
+          tar -xzf "$asset_dir/reviewgate-x86_64-unknown-linux-gnu.tar.gz" -C "$asset_dir"
+          cmp "$install_dir/reviewgate" "$asset_dir/reviewgate"
+          fresh_dir="$RUNNER_TEMP/reviewgate-fresh-smoke"
+          REVIEWGATE_VERSION=v0.9.5 REVIEWGATE_INSTALL_DIR="$fresh_dir" sh "$installer"
+          cmp "$fresh_dir/reviewgate" "$asset_dir/reviewgate"
+
       - id: reviewgate
         uses: LVTD-LLC/reviewgate@v0
         with:
@@ -76,6 +98,23 @@ jobs:
             and .metrics.verifier_ms == null
             and ([.cost_summary.components[]
               | select(.label == "blocker_verifier")] | length) == 0
+          ' .reviewgate/review.json
+
+      - name: Verify exact-head coverage and usage accounting
+        if: ${{ always() && steps.reviewgate.outcome != 'skipped' }}
+        env:
+          EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          jq -e '
+            .status == "passed"
+            and .score == 5
+            and .reviewed_sha == env.EXPECTED_HEAD_SHA
+            and .metrics.analyzed_line_count > 0
+            and (.angle_errors | length) == 0
+            and (.cost_summary.components | length) == 2
+            and all(.cost_summary.components[];
+              .prompt_tokens > 0 and .completion_tokens > 0
+              and .model == "openai/gpt-4.1-mini")
           ' .reviewgate/review.json
 
   rereview:
